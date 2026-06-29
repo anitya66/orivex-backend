@@ -93,4 +93,21 @@ public class FreelancerProfileServiceImpl implements FreelancerProfileService {
 
     }
 
+    @Override
+    public ApiResponse<FreelancerProfileResponse> getProfileById(
+            Long id) {
+
+        FreelancerProfile profile = freelancerProfileRepository
+                .findById(id)
+                .orElseThrow(() -> new BadRequestException(
+                        "Freelancer profile not found."));
+
+        FreelancerProfileResponse response = freelancerProfileMapper.toResponse(profile);
+
+        return ApiResponse.success(
+                response,
+                "Freelancer profile fetched successfully.");
+
+    }
+
 }

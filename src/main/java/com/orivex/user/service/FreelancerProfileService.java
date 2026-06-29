@@ -15,4 +15,7 @@ public interface FreelancerProfileService {
     ApiResponse<FreelancerProfileResponse> updateProfile(
             UpdateFreelancerProfileRequest request);
 
+    ApiResponse<FreelancerProfileResponse> getProfileById(
+            Long id);
+
 }

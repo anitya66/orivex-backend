@@ -43,4 +43,12 @@ public class FreelancerProfileController {
 
     }
 
+    @GetMapping("/profile/{id}")
+    public ApiResponse<FreelancerProfileResponse> getProfileById(
+            @PathVariable Long id) {
+
+        return freelancerProfileService.getProfileById(id);
+
+    }
+
 }
