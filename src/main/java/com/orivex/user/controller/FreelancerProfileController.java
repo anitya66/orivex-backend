@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import com.orivex.common.response.ApiResponse;
 import com.orivex.user.dto.CreateFreelancerProfileRequest;
 import com.orivex.user.dto.FreelancerProfileResponse;
+import com.orivex.user.dto.UpdateFreelancerProfileRequest;
 import com.orivex.user.service.FreelancerProfileService;
 
 import jakarta.validation.Valid;
@@ -21,7 +22,6 @@ public class FreelancerProfileController {
 
     @PostMapping("/profile")
     public ApiResponse<FreelancerProfileResponse> createProfile(
-
             @Valid @RequestBody CreateFreelancerProfileRequest request) {
 
         return freelancerProfileService.createProfile(request);
@@ -32,6 +32,14 @@ public class FreelancerProfileController {
     public ApiResponse<FreelancerProfileResponse> getMyProfile() {
 
         return freelancerProfileService.getMyProfile();
+
+    }
+
+    @PutMapping("/profile")
+    public ApiResponse<FreelancerProfileResponse> updateProfile(
+            @Valid @RequestBody UpdateFreelancerProfileRequest request) {
+
+        return freelancerProfileService.updateProfile(request);
 
     }
 

@@ -7,6 +7,7 @@ import com.orivex.common.response.ApiResponse;
 import com.orivex.security.AuthenticationFacade;
 import com.orivex.user.dto.CreateFreelancerProfileRequest;
 import com.orivex.user.dto.FreelancerProfileResponse;
+import com.orivex.user.dto.UpdateFreelancerProfileRequest;
 import com.orivex.user.entity.FreelancerProfile;
 import com.orivex.user.entity.User;
 import com.orivex.user.mapper.FreelancerProfileMapper;
@@ -16,8 +17,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class FreelancerProfileServiceImpl
-        implements FreelancerProfileService {
+public class FreelancerProfileServiceImpl implements FreelancerProfileService {
 
     private final FreelancerProfileRepository freelancerProfileRepository;
 
@@ -31,13 +31,11 @@ public class FreelancerProfileServiceImpl
 
         User currentUser = authenticationFacade.getCurrentUser();
 
-        if (currentUser == null) {
-            throw new BadRequestException("User not authenticated.");
-        }
+        if (freelancerProfileRepository.findByUser(currentUser).isPresent()) {
 
-        if (freelancerProfileRepository.existsByUser(currentUser)) {
             throw new BadRequestException(
                     "Freelancer profile already exists.");
+
         }
 
         FreelancerProfile profile = freelancerProfileMapper.toEntity(request);
@@ -59,8 +57,7 @@ public class FreelancerProfileServiceImpl
 
         User currentUser = authenticationFacade.getCurrentUser();
 
-        FreelancerProfile profile = freelancerProfileRepository
-                .findByUser(currentUser)
+        FreelancerProfile profile = freelancerProfileRepository.findByUser(currentUser)
                 .orElseThrow(() -> new BadRequestException(
                         "Freelancer profile not found."));
 
@@ -69,6 +66,30 @@ public class FreelancerProfileServiceImpl
         return ApiResponse.success(
                 response,
                 "Freelancer profile fetched successfully.");
+
+    }
+
+    @Override
+    public ApiResponse<FreelancerProfileResponse> updateProfile(
+            UpdateFreelancerProfileRequest request) {
+
+        User currentUser = authenticationFacade.getCurrentUser();
+
+        FreelancerProfile profile = freelancerProfileRepository.findByUser(currentUser)
+                .orElseThrow(() -> new BadRequestException(
+                        "Freelancer profile not found."));
+
+        freelancerProfileMapper.updateEntity(
+                request,
+                profile);
+
+        FreelancerProfile updatedProfile = freelancerProfileRepository.save(profile);
+
+        FreelancerProfileResponse response = freelancerProfileMapper.toResponse(updatedProfile);
+
+        return ApiResponse.success(
+                response,
+                "Freelancer profile updated successfully.");
 
     }
 

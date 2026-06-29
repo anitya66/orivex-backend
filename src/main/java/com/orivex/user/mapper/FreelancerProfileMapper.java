@@ -12,6 +12,9 @@ import com.orivex.user.entity.FreelancerProfile;
 @Mapper(componentModel = "spring")
 public interface FreelancerProfileMapper {
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "user", ignore = true)
     FreelancerProfile toEntity(CreateFreelancerProfileRequest request);
 
@@ -19,6 +22,9 @@ public interface FreelancerProfileMapper {
     @Mapping(target = "email", source = "user.email")
     FreelancerProfileResponse toResponse(FreelancerProfile profile);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "user", ignore = true)
     void updateEntity(
             UpdateFreelancerProfileRequest request,
