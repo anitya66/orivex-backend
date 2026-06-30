@@ -1,5 +1,6 @@
 package com.orivex.bid.service;
 
+import com.orivex.contract.service.ContractService;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,9 @@ public class BidServiceImpl implements BidService {
     private final FreelancerProfileRepository freelancerProfileRepository;
 
     private final AuthenticationFacade authenticationFacade;
+
+
+    private final ContractService contractService;
 
     @Override
     public ApiResponse<BidResponse> createBid(
@@ -223,8 +227,7 @@ public class BidServiceImpl implements BidService {
 
     @Transactional
     @Override
-    public ApiResponse<String> acceptBid(
-            Long bidId) {
+    public ApiResponse<String> acceptBid(Long bidId) {
 
         User currentUser = authenticationFacade.getCurrentUser();
 
@@ -240,24 +243,31 @@ public class BidServiceImpl implements BidService {
 
             throw new BadRequestException(
                     "You can accept bids only for your own projects.");
+
         }
 
         if (acceptedBid.getStatus() != BidStatus.PENDING) {
 
             throw new BadRequestException(
                     "Only pending bids can be accepted.");
+
         }
 
+        // Accept selected bid
         acceptedBid.setStatus(BidStatus.ACCEPTED);
 
         bidRepository.save(acceptedBid);
 
+        contractService.createContract(acceptedBid);
+
+        // Update Project Status
         Project project = acceptedBid.getProject();
 
         project.setStatus(ProjectStatus.IN_PROGRESS);
 
         projectRepository.save(project);
 
+        // Reject all remaining pending bids
         List<Bid> otherPendingBids = bidRepository.findByProjectAndStatus(
                 project,
                 BidStatus.PENDING);
