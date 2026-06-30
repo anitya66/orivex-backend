@@ -1,7 +1,7 @@
 package com.orivex.bid.service;
 
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.orivex.bid.dto.BidResponse;
@@ -221,17 +221,18 @@ public class BidServiceImpl implements BidService {
 
     }
 
+    @Transactional
     @Override
     public ApiResponse<String> acceptBid(
             Long bidId) {
 
         User currentUser = authenticationFacade.getCurrentUser();
 
-        Bid bid = bidRepository.findById(bidId)
+        Bid acceptedBid = bidRepository.findById(bidId)
                 .orElseThrow(() -> new BadRequestException(
                         "Bid not found."));
 
-        if (!bid.getProject()
+        if (!acceptedBid.getProject()
                 .getClient()
                 .getUser()
                 .getId()
@@ -239,19 +240,39 @@ public class BidServiceImpl implements BidService {
 
             throw new BadRequestException(
                     "You can accept bids only for your own projects.");
-
         }
 
-        if (bid.getStatus() != BidStatus.PENDING) {
+        if (acceptedBid.getStatus() != BidStatus.PENDING) {
 
             throw new BadRequestException(
                     "Only pending bids can be accepted.");
-
         }
 
-        bid.setStatus(BidStatus.ACCEPTED);
+        acceptedBid.setStatus(BidStatus.ACCEPTED);
 
-        bidRepository.save(bid);
+        bidRepository.save(acceptedBid);
+
+        Project project = acceptedBid.getProject();
+
+        project.setStatus(ProjectStatus.IN_PROGRESS);
+
+        projectRepository.save(project);
+
+        List<Bid> otherPendingBids = bidRepository.findByProjectAndStatus(
+                project,
+                BidStatus.PENDING);
+
+        for (Bid bid : otherPendingBids) {
+
+            if (!bid.getId().equals(acceptedBid.getId())) {
+
+                bid.setStatus(BidStatus.REJECTED);
+
+                bidRepository.save(bid);
+
+            }
+
+        }
 
         return ApiResponse.success(
                 "Bid accepted successfully.");
