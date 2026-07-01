@@ -24,6 +24,13 @@ public interface ProjectService {
         int size,
         String sortBy,
         String direction,
-        ProjectStatus status);             
+                    ProjectStatus status);
+        
+    ApiResponse<PagedResponse<ProjectResponse>> searchProjects(
+                    String keyword,
+                    int page,
+                    int size,
+                    String sortBy,
+                    String direction);                
 
 }

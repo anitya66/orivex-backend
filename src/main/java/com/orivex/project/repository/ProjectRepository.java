@@ -25,4 +25,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             ProjectStatus status,
             Pageable pageable);
 
+    Page<Project> findByTitleContainingIgnoreCase(
+            String keyword,
+            Pageable pageable);        
+
         }

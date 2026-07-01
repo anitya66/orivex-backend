@@ -149,4 +149,43 @@ public class ProjectServiceImpl implements ProjectService {
 
     }
 
+    @Override
+    public ApiResponse<PagedResponse<ProjectResponse>> searchProjects(
+                    String keyword,
+                    int page,
+                    int size,
+                    String sortBy,
+                    String direction) {
+
+            Sort sort = direction.equalsIgnoreCase("desc")
+                            ? Sort.by(sortBy).descending()
+                            : Sort.by(sortBy).ascending();
+
+            Pageable pageable = PageRequest.of(
+                            page,
+                            size,
+                            sort);
+
+            Page<ProjectResponse> projectPage = projectRepository
+                            .findByTitleContainingIgnoreCase(
+                                            keyword,
+                                            pageable)
+                            .map(projectMapper::toResponse);
+
+            PagedResponse<ProjectResponse> response = PagedResponse.<ProjectResponse>builder()
+                            .content(projectPage.getContent())
+                            .page(projectPage.getNumber())
+                            .size(projectPage.getSize())
+                            .totalItems(projectPage.getTotalElements())
+                            .totalPages(projectPage.getTotalPages())
+                            .hasNext(projectPage.hasNext())
+                            .hasPrevious(projectPage.hasPrevious())
+                            .build();
+
+            return ApiResponse.success(
+                            response,
+                            "Projects fetched successfully.");
+
+    }
+
 }

@@ -52,15 +52,33 @@ public class ProjectController {
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(defaultValue = "createdAt") String sortBy,
         @RequestParam(defaultValue = "desc") String direction,
-        @RequestParam(required = false) ProjectStatus status) {
+            @RequestParam(required = false) ProjectStatus status) {
 
-    return projectService.getProjects(
-            page,
-            size,
-            sortBy,
-            direction,
-            status);
+        return projectService.getProjects(
+                page,
+                size,
+                sortBy,
+                direction,
+                status);
 
-}
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PagedResponse<ProjectResponse>> searchProjects(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        return projectService.searchProjects(
+                keyword,
+                page,
+                size,
+                sortBy,
+                direction);
+
+    }
+
 
 }
