@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
+import com.orivex.project.specification.ProjectSpecification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
 import com.orivex.common.exception.BadRequestException;
@@ -101,11 +103,14 @@ public class ProjectServiceImpl implements ProjectService {
     
     @Override
     public ApiResponse<PagedResponse<ProjectResponse>> getProjects(
+
                     int page,
                     int size,
                     String sortBy,
                     String direction,
-                    ProjectStatus status) {
+                    ProjectStatus status,
+                    String keyword,
+                    Double minBudget) {
 
             Sort sort = direction.equalsIgnoreCase("desc")
                             ? Sort.by(sortBy).descending()
@@ -116,19 +121,32 @@ public class ProjectServiceImpl implements ProjectService {
                             size,
                             sort);
 
-            Page<Project> projects;
+            Specification<Project> specification = Specification.where(null);
 
-            if (status == null) {
+            if (status != null) {
 
-                    projects = projectRepository.findAll(pageable);
-
-            } else {
-
-                    projects = projectRepository.findByStatus(
-                                    status,
-                                    pageable);
+                    specification = specification.and(
+                                    ProjectSpecification.hasStatus(status));
 
             }
+
+            if (keyword != null && !keyword.isBlank()) {
+
+                    specification = specification.and(
+                                    ProjectSpecification.titleContains(keyword));
+
+            }
+
+            if (minBudget != null) {
+
+                    specification = specification.and(
+                                    ProjectSpecification.hasMinimumBudget(minBudget));
+
+            }
+
+            Page<Project> projects = projectRepository.findAll(
+                            specification,
+                            pageable);
 
             Page<ProjectResponse> projectPage = projects.map(
                             projectMapper::toResponse);

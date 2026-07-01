@@ -20,11 +20,13 @@ public interface ProjectService {
                     Long id);
             
     ApiResponse<PagedResponse<ProjectResponse>> getProjects(
-        int page,
-        int size,
-        String sortBy,
-        String direction,
-                    ProjectStatus status);
+                    int page,
+                    int size,
+                    String sortBy,
+                    String direction,
+                    ProjectStatus status,
+                    String keyword,
+                    Double minBudget);
         
     ApiResponse<PagedResponse<ProjectResponse>> searchProjects(
                     String keyword,

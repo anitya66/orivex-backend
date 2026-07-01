@@ -48,18 +48,29 @@ public class ProjectController {
 
     @GetMapping("/paginated")
     public ApiResponse<PagedResponse<ProjectResponse>> getProjects(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(defaultValue = "createdAt") String sortBy,
-        @RequestParam(defaultValue = "desc") String direction,
-            @RequestParam(required = false) ProjectStatus status) {
+
+            @RequestParam(defaultValue = "0") int page,
+
+            @RequestParam(defaultValue = "5") int size,
+
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+
+            @RequestParam(defaultValue = "desc") String direction,
+
+            @RequestParam(required = false) ProjectStatus status,
+
+            @RequestParam(required = false) String keyword,
+
+            @RequestParam(required = false) Double minBudget) {
 
         return projectService.getProjects(
                 page,
                 size,
                 sortBy,
                 direction,
-                status);
+                status,
+                keyword,
+                minBudget);
 
     }
 

@@ -1,5 +1,6 @@
 package com.orivex.project.repository;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +12,9 @@ import com.orivex.project.entity.Project;
 
 import com.orivex.user.entity.ClientProfile;
 
-public interface ProjectRepository extends JpaRepository<Project, Long> {
+public interface ProjectRepository
+        extends JpaRepository<Project, Long>,
+        JpaSpecificationExecutor<Project> {
 
     List<Project> findByClient(ClientProfile client);
 
