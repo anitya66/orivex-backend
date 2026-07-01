@@ -1,9 +1,12 @@
 package com.orivex.project.service;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Sort;
 import com.orivex.common.exception.BadRequestException;
 import com.orivex.common.response.ApiResponse;
 import com.orivex.project.dto.CreateProjectRequest;
@@ -82,16 +85,56 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ApiResponse<ProjectResponse> getProjectById(
-            Long id) {
+                    Long id) {
 
-        Project project = projectRepository
-                .findById(id)
-                .orElseThrow(() -> new BadRequestException(
-                        "Project not found."));
+            Project project = projectRepository
+                            .findById(id)
+                            .orElseThrow(() -> new BadRequestException(
+                                            "Project not found."));
 
-        return ApiResponse.success(
-                projectMapper.toResponse(project),
-                "Project fetched successfully.");
+            return ApiResponse.success(
+                            projectMapper.toResponse(project),
+                            "Project fetched successfully.");
+
+    }
+    
+    @Override
+    public ApiResponse<Page<ProjectResponse>> getProjects(
+                    int page,
+                    int size,
+                    String sortBy,
+                    String direction,
+                    ProjectStatus status) {
+
+            Sort sort = direction.equalsIgnoreCase("desc")
+                            ? Sort.by(sortBy).descending()
+                            : Sort.by(sortBy).ascending();
+
+            Pageable pageable = PageRequest.of(
+                            page,
+                            size,
+                            sort);
+
+            Page<Project> projects;
+
+            if (status == null) {
+
+                    projects = projectRepository.findAll(pageable);
+
+            } else {
+
+                    projects = projectRepository.findByStatus(
+                                    status,
+                                    pageable);
+
+            }
+
+            Page<ProjectResponse> response = projects.map(
+                            projectMapper::toResponse);
+
+            return ApiResponse.success(
+                            response,
+                            "Projects fetched successfully.");
 
     }
 

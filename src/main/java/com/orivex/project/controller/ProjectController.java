@@ -1,13 +1,14 @@
 package com.orivex.project.controller;
 
 import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.orivex.common.response.ApiResponse;
 import com.orivex.project.dto.CreateProjectRequest;
 import com.orivex.project.dto.ProjectResponse;
+import com.orivex.project.enums.ProjectStatus;
 import com.orivex.project.service.ProjectService;
 
 import jakarta.validation.Valid;
@@ -43,5 +44,22 @@ public class ProjectController {
         return projectService.getProjectById(id);
 
     }
+
+    @GetMapping("/paginated")
+public ApiResponse<Page<ProjectResponse>> getProjects(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(defaultValue = "createdAt") String sortBy,
+        @RequestParam(defaultValue = "desc") String direction,
+        @RequestParam(required = false) ProjectStatus status) {
+
+    return projectService.getProjects(
+            page,
+            size,
+            sortBy,
+            direction,
+            status);
+
+}
 
 }
