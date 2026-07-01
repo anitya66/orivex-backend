@@ -2,7 +2,7 @@ package com.orivex.contract.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import com.orivex.contract.dto.SubmitWorkRequest;
 import org.springframework.stereotype.Service;
 
 import com.orivex.bid.entity.Bid;
@@ -173,6 +173,84 @@ public class ContractServiceImpl implements ContractService {
 
             return ApiResponse.success(
                             "Contract started successfully.");
+
+    }
+
+    @Override
+    public ApiResponse<String> submitWork(
+                    Long contractId,
+                    SubmitWorkRequest request) {
+
+            User currentUser = authenticationFacade.getCurrentUser();
+
+            Contract contract = contractRepository.findById(contractId)
+                            .orElseThrow(() -> new BadRequestException(
+                                            "Contract not found."));
+
+            if (!contract.getFreelancer()
+                            .getUser()
+                            .getId()
+                            .equals(currentUser.getId())) {
+
+                    throw new BadRequestException(
+                                    "Only the assigned freelancer can submit work.");
+
+            }
+
+            if (contract.getStatus() != ContractStatus.ACTIVE) {
+
+                    throw new BadRequestException(
+                                    "Only active contracts can be submitted.");
+
+            }
+
+            contract.setSubmissionUrl(request.getSubmissionUrl());
+
+            contract.setSubmissionNotes(request.getSubmissionNotes());
+
+            contract.setSubmittedAt(LocalDate.now());
+
+            contract.setStatus(ContractStatus.SUBMITTED);
+
+            contractRepository.save(contract);
+
+            return ApiResponse.success(
+                            "Work submitted successfully.");
+
+    }
+
+    @Override
+    public ApiResponse<String> approveContract(Long contractId) {
+
+            User currentUser = authenticationFacade.getCurrentUser();
+
+            Contract contract = contractRepository.findById(contractId)
+                            .orElseThrow(() -> new BadRequestException(
+                                            "Contract not found."));
+
+            if (!contract.getClient()
+                            .getUser()
+                            .getId()
+                            .equals(currentUser.getId())) {
+
+                    throw new BadRequestException(
+                                    "Only the client can approve this contract.");
+
+            }
+
+            if (contract.getStatus() != ContractStatus.SUBMITTED) {
+
+                    throw new BadRequestException(
+                                    "Only submitted contracts can be approved.");
+
+            }
+
+            contract.setStatus(ContractStatus.COMPLETED);
+
+            contractRepository.save(contract);
+
+            return ApiResponse.success(
+                            "Contract approved successfully.");
 
     }
 
