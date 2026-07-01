@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.orivex.common.dto.PagedResponse;
 import com.orivex.common.response.ApiResponse;
 import com.orivex.project.dto.CreateProjectRequest;
 import com.orivex.project.dto.ProjectResponse;
@@ -46,7 +47,7 @@ public class ProjectController {
     }
 
     @GetMapping("/paginated")
-public ApiResponse<Page<ProjectResponse>> getProjects(
+    public ApiResponse<PagedResponse<ProjectResponse>> getProjects(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(defaultValue = "createdAt") String sortBy,

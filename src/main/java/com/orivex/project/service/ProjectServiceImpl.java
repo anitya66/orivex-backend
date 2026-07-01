@@ -1,5 +1,6 @@
 package com.orivex.project.service;
 
+import com.orivex.common.dto.PagedResponse;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -99,7 +100,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
     
     @Override
-    public ApiResponse<Page<ProjectResponse>> getProjects(
+    public ApiResponse<PagedResponse<ProjectResponse>> getProjects(
                     int page,
                     int size,
                     String sortBy,
@@ -129,8 +130,18 @@ public class ProjectServiceImpl implements ProjectService {
 
             }
 
-            Page<ProjectResponse> response = projects.map(
+            Page<ProjectResponse> projectPage = projects.map(
                             projectMapper::toResponse);
+
+            PagedResponse<ProjectResponse> response = PagedResponse.<ProjectResponse>builder()
+                            .content(projectPage.getContent())
+                            .page(projectPage.getNumber())
+                            .size(projectPage.getSize())
+                            .totalItems(projectPage.getTotalElements())
+                            .totalPages(projectPage.getTotalPages())
+                            .hasNext(projectPage.hasNext())
+                            .hasPrevious(projectPage.hasPrevious())
+                            .build();
 
             return ApiResponse.success(
                             response,
