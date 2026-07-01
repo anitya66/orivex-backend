@@ -15,6 +15,8 @@ public interface ContractService {
     ApiResponse<ContractResponse> getContractById(
             Long contractId);
 
-    void createContract(Bid acceptedBid);        
+    void createContract(Bid acceptedBid);
+    
+    ApiResponse<String> startContract(Long contractId);
 
 }

@@ -49,6 +49,16 @@ public class Contract extends BaseEntity {
     @Column(nullable = false)
     private LocalDate deadline;
 
+    @Column(length = 500)
+    private String submissionUrl;
+
+    @Column(length = 1000)
+    private String submissionNotes;
+
+    private LocalDate submittedAt;
+
+    private LocalDate startedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContractStatus status;

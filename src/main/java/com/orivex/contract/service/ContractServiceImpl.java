@@ -1,5 +1,5 @@
 package com.orivex.contract.service;
-
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,24 +118,61 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public void createContract(Bid acceptedBid) {
 
-        if (contractRepository.existsByBid(acceptedBid)) {
+            if (contractRepository.existsByBid(acceptedBid)) {
 
-            throw new BadRequestException(
-                    "Contract already exists for this bid.");
+                    throw new BadRequestException(
+                                    "Contract already exists for this bid.");
 
-        }
+            }
 
-        Contract contract = Contract.builder()
-                .project(acceptedBid.getProject())
-                .client(acceptedBid.getProject().getClient())
-                .freelancer(acceptedBid.getFreelancer())
-                .bid(acceptedBid)
-                .agreedBudget(acceptedBid.getProposedBudget())
-                .deadline(acceptedBid.getProject().getDeadline())
-                .status(ContractStatus.PENDING)
-                .build();
+            Contract contract = Contract.builder()
+                            .project(acceptedBid.getProject())
+                            .client(acceptedBid.getProject().getClient())
+                            .freelancer(acceptedBid.getFreelancer())
+                            .bid(acceptedBid)
+                            .agreedBudget(acceptedBid.getProposedBudget())
+                            .deadline(acceptedBid.getProject().getDeadline())
+                            .status(ContractStatus.PENDING)
+                            .build();
 
-        contractRepository.save(contract);
+            contractRepository.save(contract);
+
+    }
+    
+    @Override
+    public ApiResponse<String> startContract(Long contractId) {
+
+            User currentUser = authenticationFacade.getCurrentUser();
+
+            Contract contract = contractRepository.findById(contractId)
+                            .orElseThrow(() -> new BadRequestException(
+                                            "Contract not found."));
+
+            if (!contract.getFreelancer()
+                            .getUser()
+                            .getId()
+                            .equals(currentUser.getId())) {
+
+                    throw new BadRequestException(
+                                    "Only the assigned freelancer can start this contract.");
+
+            }
+
+            if (contract.getStatus() != ContractStatus.PENDING) {
+
+                    throw new BadRequestException(
+                                    "Only pending contracts can be started.");
+
+            }
+
+            contract.setStatus(ContractStatus.ACTIVE);
+
+            contract.setStartedAt(LocalDate.now());
+
+            contractRepository.save(contract);
+
+            return ApiResponse.success(
+                            "Contract started successfully.");
 
     }
 
