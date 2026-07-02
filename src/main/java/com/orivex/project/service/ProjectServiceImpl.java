@@ -6,7 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.orivex.project.specification.ProjectSpecification;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Sort;
@@ -29,6 +30,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProjectServiceImpl implements ProjectService {
 
+
+
     private final ProjectRepository projectRepository;
 
     private final ProjectMapper projectMapper;
@@ -37,32 +40,40 @@ public class ProjectServiceImpl implements ProjectService {
 
     private final ClientProfileRepository clientProfileRepository;
 
+    private static final Logger logger = LoggerFactory.getLogger(ProjectServiceImpl.class);
+
     @Override
-    public ApiResponse<ProjectResponse> createProject(
-            CreateProjectRequest request) {
+    public ApiResponse<ProjectResponse> createProject(CreateProjectRequest request) {
 
-        User currentUser = authenticationFacade.getCurrentUser();
+            logger.info("Creating a new project.");
 
-        ClientProfile clientProfile = clientProfileRepository
-                .findByUser(currentUser)
-                .orElseThrow(() -> new BadRequestException(
-                        "Client profile not found."));
+            User currentUser = authenticationFacade.getCurrentUser();
 
-        Project project = projectMapper.toEntity(request);
+            logger.info("Current user: {}", currentUser.getEmail());
 
-        project.setClient(clientProfile);
+            ClientProfile client = clientProfileRepository
+                            .findByUser(currentUser)
+                            .orElseThrow(() -> new BadRequestException(
+                                            "Client profile not found."));
 
-        project.setStatus(ProjectStatus.OPEN);
+            Project project = projectMapper.toEntity(request);
 
-        Project savedProject = projectRepository.save(project);
+            project.setClient(client);
 
-        ProjectResponse response = projectMapper.toResponse(savedProject);
+            logger.info("Saving project with title: {}", request.getTitle());
 
-        return ApiResponse.success(
-                response,
-                "Project created successfully.");
+            Project savedProject = projectRepository.save(project);
 
+            logger.info("Project created successfully. Project ID: {}",
+                            savedProject.getId());
+
+            ProjectResponse response = projectMapper.toResponse(savedProject);
+
+            return ApiResponse.success(
+                            response,
+                            "Project created successfully.");
     }
+    
 
     @Override
     public ApiResponse<List<ProjectResponse>> getMyProjects() {
